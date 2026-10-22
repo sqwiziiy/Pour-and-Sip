@@ -1,0 +1,7 @@
+{
+  "item.poursip.drinking_glass": "Стакан",
+  "item.poursip.wine_glass": "Винный бокал",
+  "tooltip.poursip.empty": "Пустой • возьми бутылочку воды или ведро молока в левую руку и нажми ПКМ",
+  "tooltip.poursip.water": "Вода • удерживай ПКМ, чтобы выпить",
+  "tooltip.poursip.milk": "Молоко • удерживай ПКМ, чтобы выпить"
+}

@@ -1,0 +1,20 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "poursip:item/drinking_glass_empty"
+  },
+  "overrides": [
+    {
+      "predicate": {
+        "poursip:fill": 0.5
+      },
+      "model": "poursip:item/drinking_glass_water"
+    },
+    {
+      "predicate": {
+        "poursip:fill": 1.0
+      },
+      "model": "poursip:item/drinking_glass_milk"
+    }
+  ]
+}

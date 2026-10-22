@@ -1,0 +1,7 @@
+{
+  "item.poursip.drinking_glass": "Drinking Glass",
+  "item.poursip.wine_glass": "Wine Glass",
+  "tooltip.poursip.empty": "Empty • hold water bottle or milk bucket in offhand, then right-click",
+  "tooltip.poursip.water": "Water • right-click and hold to drink",
+  "tooltip.poursip.milk": "Milk • right-click and hold to drink"
+}
