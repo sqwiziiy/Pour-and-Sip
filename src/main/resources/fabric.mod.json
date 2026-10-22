@@ -1,15 +1,21 @@
 {
   "schemaVersion": 1,
-  "id": "poursip",
+  "id": "pour_and_seap",
   "version": "${version}",
-  "name": "Pour & Sip",
-  "description": "Independent fillable glassware for Minecraft 1.20.1 (early water & milk prototype)",
-  "authors": ["Storm Survival community"],
-  "license": "MIT",
+  "name": "Pour & Seap",
+  "description": "Placeable glasses that can hold water and milk (prototype)",
+  "authors": [
+    "Mentality"
+  ],
+  "license": "All Rights Reserved",
   "environment": "*",
   "entrypoints": {
-    "main": ["com.poursip.PourAndSip"],
-    "client": ["com.poursip.PourAndSipClient"]
+    "main": [
+      "com.mentality.pour_and_seap.PourAndSeap"
+    ],
+    "client": [
+      "com.mentality.pour_and_seap.PourAndSeapClient"
+    ]
   },
   "depends": {
     "fabricloader": ">=0.16.0",

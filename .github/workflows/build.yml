@@ -14,13 +14,11 @@ jobs:
           distribution: temurin
           java-version: '17'
       - uses: gradle/actions/setup-gradle@v4
-        with:
-          gradle-version: '8.8'
       - name: Compile Fabric mod
-        run: gradle --no-daemon build
+        run: ./gradlew --no-daemon build
       - name: Publish actual mod JAR
         uses: actions/upload-artifact@v4
         with:
-          name: poursip-Fabric-1.20.1-JAR
-          path: build/libs/poursip-0.1.0.jar
+          name: pour_and_seap-Fabric-1.20.1-JAR
+          path: build/libs/pour_and_seap-0.2.0.jar
           if-no-files-found: error

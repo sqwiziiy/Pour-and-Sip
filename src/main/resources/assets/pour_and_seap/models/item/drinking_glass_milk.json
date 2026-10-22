@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "pour_and_seap:item/drinking_glass_milk"
+  }
+}

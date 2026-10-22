@@ -5,4 +5,4 @@ pluginManagement {
         mavenCentral()
     }
 }
-rootProject.name = 'pour-and-sip'
+rootProject.name = 'pour_and_seap'

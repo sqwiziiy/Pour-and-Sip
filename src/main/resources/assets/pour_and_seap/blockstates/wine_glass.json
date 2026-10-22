@@ -1,0 +1,13 @@
+{
+  "variants": {
+    "fill=0": {
+      "model": "pour_and_seap:block/wine_glass_empty"
+    },
+    "fill=1": {
+      "model": "pour_and_seap:block/wine_glass_water"
+    },
+    "fill=2": {
+      "model": "pour_and_seap:block/wine_glass_milk"
+    }
+  }
+}
