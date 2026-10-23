@@ -19,7 +19,8 @@ concurrency:
 
 jobs:
   release:
-    if: github.event_name == 'workflow_dispatch' || startsWith(github.event.head_commit.message, 'release: v')
+    if: >-
+      github.event_name == 'workflow_dispatch' || startsWith(github.event.head_commit.message, 'release: v')
     runs-on: ubuntu-latest
     timeout-minutes: 30
     env:
