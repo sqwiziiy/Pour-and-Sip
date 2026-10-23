@@ -4,6 +4,11 @@
   "item.pour_and_seap.drinking_glass": "Drinking Glass",
   "item.pour_and_seap.wine_glass": "Wine Glass",
   "itemGroup.pour_and_seap.main": "Pour & Seap",
-  "tooltip.pour_and_seap.water": "Water",
-  "tooltip.pour_and_seap.milk": "Milk"
+  "tooltip.pour_and_seap.contents": "Liquid: %s",
+  "drink.pour_and_seap.water": "Water",
+  "drink.pour_and_seap.milk": "Milk",
+  "item.pour_and_seap.drinking_glass_water": "Drinking Glass",
+  "item.pour_and_seap.drinking_glass_milk": "Drinking Glass",
+  "item.pour_and_seap.wine_glass_water": "Wine Glass",
+  "item.pour_and_seap.wine_glass_milk": "Wine Glass"
 }

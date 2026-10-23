@@ -6,6 +6,7 @@ import net.fabricmc.fabric.api.itemgroup.v1.FabricItemGroup;
 import net.fabricmc.fabric.api.itemgroup.v1.ItemGroupEvents;
 import net.minecraft.block.AbstractBlock;
 import net.minecraft.sound.BlockSoundGroup;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemGroups;
 import net.minecraft.item.ItemStack;
@@ -24,12 +25,32 @@ public class PourAndSeap implements ModInitializer {
         Registries.BLOCK, id("wine_glass"),
         new VesselBlock(AbstractBlock.Settings.create().strength(0.3f).sounds(BlockSoundGroup.GLASS).nonOpaque(), true));
 
-    public static final VesselItem DRINKING_GLASS = Registry.register(
-        Registries.ITEM, id("drinking_glass"),
-        new VesselItem(DRINKING_GLASS_BLOCK, new FabricItemSettings().maxCount(1)));
-    public static final VesselItem WINE_GLASS = Registry.register(
-        Registries.ITEM, id("wine_glass"),
-        new VesselItem(WINE_GLASS_BLOCK, new FabricItemSettings().maxCount(1)));
+    // Empty glasses are vanilla-stacking items. Filled glasses are separate, hidden
+    // registered variants with maxCount(1): no ItemStack/Inventory core mixin needed.
+    public static final VesselItem DRINKING_GLASS = register("drinking_glass", DRINKING_GLASS_BLOCK, 0);
+    public static final VesselItem WINE_GLASS = register("wine_glass", WINE_GLASS_BLOCK, 0);
+    public static final VesselItem DRINKING_GLASS_WATER = register("drinking_glass_water", DRINKING_GLASS_BLOCK, 1);
+    public static final VesselItem DRINKING_GLASS_MILK = register("drinking_glass_milk", DRINKING_GLASS_BLOCK, 2);
+    public static final VesselItem WINE_GLASS_WATER = register("wine_glass_water", WINE_GLASS_BLOCK, 1);
+    public static final VesselItem WINE_GLASS_MILK = register("wine_glass_milk", WINE_GLASS_BLOCK, 2);
+
+    private static VesselItem register(String path, VesselBlock block, int fill) {
+        return Registry.register(Registries.ITEM, id(path),
+            new VesselItem(block, new FabricItemSettings().maxCount(fill == 0 ? 16 : 1), fill));
+    }
+
+    public static VesselItem vesselItem(VesselBlock block, int fill) {
+        boolean wine = block == WINE_GLASS_BLOCK;
+        return switch (fill) {
+            case 1 -> wine ? WINE_GLASS_WATER : DRINKING_GLASS_WATER;
+            case 2 -> wine ? WINE_GLASS_MILK : DRINKING_GLASS_MILK;
+            default -> wine ? WINE_GLASS : DRINKING_GLASS;
+        };
+    }
+
+    public static Identifier id(String path) {
+        return new Identifier(MOD_ID, path);
+    }
 
     public static final ItemGroup GROUP = Registry.register(
         Registries.ITEM_GROUP, id("main"),
@@ -41,12 +62,9 @@ public class PourAndSeap implements ModInitializer {
                 entries.add(WINE_GLASS);
             }).build());
 
-    public static Identifier id(String path) {
-        return new Identifier(MOD_ID, path);
-    }
-
     @Override
     public void onInitialize() {
+        // The four filled variants intentionally remain hidden from Creative tabs.
         ItemGroupEvents.modifyEntriesEvent(ItemGroups.FOOD_AND_DRINK).register(entries -> {
             entries.add(DRINKING_GLASS);
             entries.add(WINE_GLASS);

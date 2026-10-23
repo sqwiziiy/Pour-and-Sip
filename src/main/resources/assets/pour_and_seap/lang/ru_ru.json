@@ -4,6 +4,11 @@
   "item.pour_and_seap.drinking_glass": "Стакан",
   "item.pour_and_seap.wine_glass": "Винный бокал",
   "itemGroup.pour_and_seap.main": "Pour & Seap",
-  "tooltip.pour_and_seap.water": "Вода",
-  "tooltip.pour_and_seap.milk": "Молоко"
+  "tooltip.pour_and_seap.contents": "Жидкость: %s",
+  "drink.pour_and_seap.water": "Вода",
+  "drink.pour_and_seap.milk": "Молоко",
+  "item.pour_and_seap.drinking_glass_water": "Стакан",
+  "item.pour_and_seap.drinking_glass_milk": "Стакан",
+  "item.pour_and_seap.wine_glass_water": "Винный бокал",
+  "item.pour_and_seap.wine_glass_milk": "Винный бокал"
 }

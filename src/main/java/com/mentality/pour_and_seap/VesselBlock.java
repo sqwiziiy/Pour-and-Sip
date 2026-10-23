@@ -22,8 +22,8 @@ import org.jetbrains.annotations.Nullable;
 
 public class VesselBlock extends Block {
     public static final IntProperty FILL = IntProperty.of("fill", 0, 2);
-    private static final VoxelShape TUMBLER_SHAPE = Block.createCuboidShape(4, 0, 4, 12, 11, 12);
-    private static final VoxelShape GOBLET_SHAPE = Block.createCuboidShape(4, 0, 4, 12, 13, 12);
+    private static final VoxelShape TUMBLER_SHAPE = Block.createCuboidShape(5.3, 0, 5.3, 10.7, 7.8, 10.7);
+    private static final VoxelShape GOBLET_SHAPE = Block.createCuboidShape(5.1, 0, 5.1, 10.9, 10.3, 10.9);
     private final boolean wineGlass;
 
     public VesselBlock(Settings settings, boolean wineGlass) {
@@ -92,9 +92,7 @@ public class VesselBlock extends Block {
 
     @Override
     public ItemStack getPickStack(BlockView world, BlockPos pos, BlockState state) {
-        ItemStack stack = new ItemStack(asItem());
-        VesselItem.setFill(stack, state.get(FILL));
-        return stack;
+        return new ItemStack(PourAndSeap.vesselItem(this, state.get(FILL)));
     }
 
     @Override

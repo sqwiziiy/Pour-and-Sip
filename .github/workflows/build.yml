@@ -14,11 +14,13 @@ jobs:
           distribution: temurin
           java-version: '17'
       - uses: gradle/actions/setup-gradle@v4
+      - name: Validate model textures and PNG integrity
+        run: python3 scripts/validate_assets.py
       - name: Compile Fabric mod
         run: ./gradlew --no-daemon build
       - name: Publish actual mod JAR
         uses: actions/upload-artifact@v4
         with:
           name: pour_and_seap-Fabric-1.20.1-JAR
-          path: build/libs/pour_and_seap-0.2.2.jar
+          path: build/libs/pour_and_seap-0.2.3.jar
           if-no-files-found: error
