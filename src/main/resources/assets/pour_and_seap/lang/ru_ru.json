@@ -21,5 +21,7 @@
   "advancement.pour_and_seap.both": "Для любого напитка",
   "advancement.pour_and_seap.both_desc": "Собери и стакан, и бокал",
   "advancement.pour_and_seap.sommelier": "Дегустация",
-  "advancement.pour_and_seap.sommelier_desc": "Налей вино из Vinery или NetherVinery"
+  "advancement.pour_and_seap.sommelier_desc": "Налей вино из Vinery или NetherVinery",
+  "advancement.pour_and_seap.root": "Pour & Seap",
+  "advancement.pour_and_seap.root_desc": "Напитки, стаканы и винные бокалы"
 }

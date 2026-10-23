@@ -1,0 +1,28 @@
+{
+  "display": {
+    "icon": {
+      "item": "pour_and_seap:wine_glass"
+    },
+    "title": {
+      "translate": "advancement.pour_and_seap.root"
+    },
+    "description": {
+      "translate": "advancement.pour_and_seap.root_desc"
+    },
+    "background": "minecraft:textures/gui/advancements/backgrounds/stone.png",
+    "frame": "task",
+    "show_toast": false,
+    "announce_to_chat": false,
+    "hidden": false
+  },
+  "criteria": {
+    "entered_world": {
+      "trigger": "minecraft:tick"
+    }
+  },
+  "requirements": [
+    [
+      "entered_world"
+    ]
+  ]
+}

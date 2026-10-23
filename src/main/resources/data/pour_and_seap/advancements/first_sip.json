@@ -14,7 +14,7 @@
     "announce_to_chat": true,
     "hidden": false
   },
-  "parent": "minecraft:story/root",
+  "parent": "pour_and_seap:root",
   "criteria": {
     "has_items": {
       "trigger": "minecraft:inventory_changed",

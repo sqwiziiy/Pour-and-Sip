@@ -11,6 +11,7 @@ import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.sound.SoundEvent;
 import net.minecraft.sound.SoundEvents;
+import net.minecraft.sound.SoundCategory;
 import net.minecraft.potion.PotionUtil;
 import net.minecraft.potion.Potions;
 import net.minecraft.text.Text;
@@ -95,7 +96,12 @@ public class VesselItem extends BlockItem {
                     ItemStack originalWine = liquid >= 3 ? source.copyWithCount(1) : ItemStack.EMPTY;
                     consumeSource(player, source, liquid);
                     ItemStack filled = new ItemStack(PourAndSeap.vesselItem(vesselBlock, liquid));
-                    if (liquid >= 3) WineContents.write(filled, originalWine);
+                    if (liquid >= 3) {
+                        WineContents.write(filled, originalWine);
+                        world.playSound(null, player.getBlockPos(), SoundEvents.ITEM_BOTTLE_EMPTY,
+                                SoundCategory.PLAYERS, 0.75f, 1.05f);
+                        PourAdvancements.winePoured(player);
+                    }
                     if (stack.getCount() > 1) {
                         ItemStack emptyRemainder = stack.copy();
                         emptyRemainder.decrement(1);

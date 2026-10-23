@@ -16,25 +16,13 @@
   },
   "parent": "pour_and_seap:first_sip",
   "criteria": {
-    "has_items": {
-      "trigger": "minecraft:inventory_changed",
-      "conditions": {
-        "items": [
-          {
-            "items": [
-              "pour_and_seap:drinking_glass_red_wine",
-              "pour_and_seap:drinking_glass_white_wine",
-              "pour_and_seap:wine_glass_red_wine",
-              "pour_and_seap:wine_glass_white_wine"
-            ]
-          }
-        ]
-      }
+    "poured_wine": {
+      "trigger": "minecraft:impossible"
     }
   },
   "requirements": [
     [
-      "has_items"
+      "poured_wine"
     ]
   ]
 }

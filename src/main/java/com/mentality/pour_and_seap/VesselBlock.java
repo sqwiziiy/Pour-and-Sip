@@ -105,8 +105,13 @@ public class VesselBlock extends Block implements BlockEntityProvider {
                     ItemStack originalWine = liquid >= 3 ? source.copyWithCount(1) : ItemStack.EMPTY;
                     VesselItem.consumeSource(player, source, liquid);
                     world.setBlockState(pos, state.with(FILL, liquid), Block.NOTIFY_ALL);
-                    if (liquid >= 3 && world.getBlockEntity(pos) instanceof VesselBlockEntity placed)
-                        placed.setWine(originalWine);
+                    if (liquid >= 3) {
+                        if (world.getBlockEntity(pos) instanceof VesselBlockEntity placed)
+                            placed.setWine(originalWine);
+                        world.playSound(null, pos, SoundEvents.ITEM_BOTTLE_EMPTY,
+                                SoundCategory.BLOCKS, 0.75f, 1.05f);
+                        PourAdvancements.winePoured(player);
+                    }
                 }
                 return ActionResult.success(world.isClient);
             }

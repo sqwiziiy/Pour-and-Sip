@@ -21,5 +21,7 @@
   "advancement.pour_and_seap.both": "Ready for Any Drink",
   "advancement.pour_and_seap.both_desc": "Obtain both types of glassware",
   "advancement.pour_and_seap.sommelier": "Wine Tasting",
-  "advancement.pour_and_seap.sommelier_desc": "Pour wine from Vinery or NetherVinery"
+  "advancement.pour_and_seap.sommelier_desc": "Pour wine from Vinery or NetherVinery",
+  "advancement.pour_and_seap.root": "Pour & Seap",
+  "advancement.pour_and_seap.root_desc": "Drinks, glasses and wine goblets"
 }
