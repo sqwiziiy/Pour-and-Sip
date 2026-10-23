@@ -5,7 +5,7 @@ Experimental Fabric 1.20.1 mod.
 - **Mod ID:** `pour_and_seap`
 - **Java package:** `com.mentality.pour_and_seap`
 - **License:** All Rights Reserved (not MIT)
-- **Version:** 0.2.3 development prototype
+- **Version:** 0.3.0 development prototype
 
 ## Features for testing
 - Drinking Glass / Wine Glass: placeable 3D blocks with narrow hitboxes.
@@ -24,7 +24,7 @@ cd Pour-and-Sip
 ls build/libs/
 ```
 Java 17 or higher is required for the Gradle build. The wrapper downloads Gradle 8.8.
-Use `build/libs/pour_and_seap-0.2.3.jar` in the Fabric 1.20.1 `mods` folder.
+Use `build/libs/pour_and_seap-0.3.0.jar` in the Fabric 1.20.1 `mods` folder.
 
 ## Test
 ```mcfunction
@@ -38,7 +38,7 @@ Remove old `poursip-0.1.0.jar`, and use a backed-up test world.
 **Not yet implemented:** Vinery wines/effects, Homeostatic thirst, partial
 liquid levels, full multiplayer gameplay testing, drop handling for explosions.
 
-## 0.2.3 model and quality fixes
+## 0.3.0 model and quality fixes
 - Survival collision now matches the glass/goblet selection outline instead of being empty.
 - Held glasses use the **same 3D mesh** as placed glassware (with separate first-person and third-person transforms).
 - Water and milk use higher-contrast, original colors with a taller filled volume, to be visible through the walls.
@@ -48,7 +48,7 @@ liquid levels, full multiplayer gameplay testing, drop handling for explosions.
 - Full in-game visual/collision tests are still required; a successful CI build only proves compilability.
 
 
-## 0.2.3: simpler solid-liquid glass models
+## 0.3.0: simpler solid-liquid glass models
 
 - No custom animation was added: vanilla `UseAction.DRINK` and its sound are preserved.
 - Item `display` positions have been corrected separately for tumbler/wine glass and both hands; the wine glass sits higher to make the avatar grip its stem, rather than its bowl. The cup is shifted toward the center during the vanilla drink animation.
@@ -58,7 +58,7 @@ liquid levels, full multiplayer gameplay testing, drop handling for explosions.
 - The frame and liquid textures are original pixel-art made for Pour & Seap.
 - Look-and-feel and hand grip must still be verified in Minecraft with your specific body animation mod and shader pack; Gradle cannot visually validate them.
 
-## v0.2.3 shape, stacking and model improvements
+## v0.3.0 shape, stacking and model improvements
 
 - Both glasses are smaller, and collision/selection boxes are resized.
 - Hollow pane-and-rim models with subtle pixel glass glints; opaque blue/white liquid volumes.
@@ -72,3 +72,34 @@ liquid levels, full multiplayer gameplay testing, drop handling for explosions.
 - Water source is still a vanilla water potion bottle, not a water bucket. Vinery wines and Homeostatic integration remain deferred.
 
 Note: successful GitHub CI validates compilation and asset PNG checks, **not** actual shader compatibility. Test in a COPY of the world.
+
+## 0.3.0 experimental soft integrations
+
+Both Vinery and NetherVinery are **optional**. Wine is recognized by
+the item tags `pour_and_seap:wines` and `pour_and_seap:red_wines`,
+plus fallback checking the originating mod's wine-item class.
+Classification defaults to red for listed red wines and pale golden otherwise.
+Modpacks can extend both tags.
+
+Pour a Vinery or NetherVinery bottle into an empty glass (in hand: bottle
+offhand / empty glass main hand, or right-click placed glass with bottle).
+The original wine **ItemStack** and all NBT fields are saved in
+the glass, or in a persistent `VesselBlockEntity` when placed.
+On drinking, the original wine item's `finishUsing` is called, so native
+age-dependent effects are processed by the original mod.
+
+The empty `vinery:wine_bottle` is returned in Survival. To undo pouring,
+right-click a placed full glass with the original empty `vinery:wine_bottle`,
+or hold full glass in main hand + empty Vinery wine bottle in offhand,
+then right-click the air. The **exact bottle ID and NBT** are restored.
+Other empty bottle types are not yet supported.
+
+Adds three small advancements: first vessel, both vessels, wine tasting.
+
+CAUTION: no in-game verification of every wine type, ages, shaders,
+the wine return mechanic or multiplayer yet. Backup your world. The
+wine source is preserved with NBT but may not tick while stored; compare
+wine age and duration in the native tooltip before/after a timed storage test.
+
+Bakery sink ↔ Kaleidoscope kettle is a separate compatibility task,
+not silently considered fixed by this release.

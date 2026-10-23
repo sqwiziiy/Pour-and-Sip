@@ -8,6 +8,12 @@
     },
     "fill=2": {
       "model": "pour_and_seap:block/wine_glass_milk"
+    },
+    "fill=3": {
+      "model": "pour_and_seap:block/wine_glass_red_wine"
+    },
+    "fill=4": {
+      "model": "pour_and_seap:block/wine_glass_white_wine"
     }
   }
 }

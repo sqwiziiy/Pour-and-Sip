@@ -10,5 +10,16 @@
   "item.pour_and_seap.drinking_glass_water": "Drinking Glass",
   "item.pour_and_seap.drinking_glass_milk": "Drinking Glass",
   "item.pour_and_seap.wine_glass_water": "Wine Glass",
-  "item.pour_and_seap.wine_glass_milk": "Wine Glass"
+  "item.pour_and_seap.wine_glass_milk": "Wine Glass",
+  "drink.pour_and_seap.wine": "Wine",
+  "item.pour_and_seap.drinking_glass_red_wine": "Drinking Glass",
+  "item.pour_and_seap.drinking_glass_white_wine": "Drinking Glass",
+  "item.pour_and_seap.wine_glass_red_wine": "Wine Glass",
+  "item.pour_and_seap.wine_glass_white_wine": "Wine Glass",
+  "advancement.pour_and_seap.toast_first": "First Sip",
+  "advancement.pour_and_seap.toast_first_desc": "Craft a drinking glass or wine glass",
+  "advancement.pour_and_seap.both": "Ready for Any Drink",
+  "advancement.pour_and_seap.both_desc": "Obtain both types of glassware",
+  "advancement.pour_and_seap.sommelier": "Wine Tasting",
+  "advancement.pour_and_seap.sommelier_desc": "Pour wine from Vinery or NetherVinery"
 }

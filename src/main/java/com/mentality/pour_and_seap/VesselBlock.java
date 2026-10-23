@@ -1,9 +1,12 @@
 package com.mentality.pour_and_seap;
 
 import net.minecraft.block.Block;
+import net.minecraft.block.BlockEntityProvider;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.ShapeContext;
+import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemPlacementContext;
 import net.minecraft.item.ItemStack;
@@ -20,8 +23,8 @@ import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
 import org.jetbrains.annotations.Nullable;
 
-public class VesselBlock extends Block {
-    public static final IntProperty FILL = IntProperty.of("fill", 0, 2);
+public class VesselBlock extends Block implements BlockEntityProvider {
+    public static final IntProperty FILL = IntProperty.of("fill", 0, 4);
     private static final VoxelShape TUMBLER_SHAPE = Block.createCuboidShape(5.3, 0, 5.3, 10.7, 7.8, 10.7);
     private static final VoxelShape GOBLET_SHAPE = Block.createCuboidShape(5.1, 0, 5.1, 10.9, 10.3, 10.9);
     private final boolean wineGlass;
@@ -30,6 +33,11 @@ public class VesselBlock extends Block {
         super(settings);
         this.wineGlass = wineGlass;
         setDefaultState(getStateManager().getDefaultState().with(FILL, 0));
+    }
+
+    @Override
+    public BlockEntity createBlockEntity(BlockPos pos, BlockState state) {
+        return new VesselBlockEntity(pos, state);
     }
 
     @Override
@@ -43,6 +51,13 @@ public class VesselBlock extends Block {
     }
 
     @Override
+    public void onPlaced(World world, BlockPos pos, BlockState state, @Nullable LivingEntity placer, ItemStack stack) {
+        super.onPlaced(world, pos, state, placer, stack);
+        if (!world.isClient && state.get(FILL) >= 3 && world.getBlockEntity(pos) instanceof VesselBlockEntity be)
+            be.setWine(WineContents.read(stack));
+    }
+
+    @Override
     public VoxelShape getOutlineShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
         return wineGlass ? GOBLET_SHAPE : TUMBLER_SHAPE;
     }
@@ -52,35 +67,67 @@ public class VesselBlock extends Block {
         return getOutlineShape(state, world, pos, context);
     }
 
+    private ItemStack makeFilledItem(BlockState state, BlockEntity entity) {
+        ItemStack stack = new ItemStack(PourAndSeap.vesselItem(this, state.get(FILL)));
+        if (state.get(FILL) >= 3 && entity instanceof VesselBlockEntity be)
+            WineContents.write(stack, be.wine());
+        return stack;
+    }
+
+    @Override
+    public ItemStack getPickStack(BlockView world, BlockPos pos, BlockState state) {
+        return makeFilledItem(state, world.getBlockEntity(pos));
+    }
+
     @Override
     public ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit) {
         if (hand != Hand.MAIN_HAND) return ActionResult.PASS;
         int fill = state.get(FILL);
-        ItemStack mainHand = player.getMainHandStack();
+        ItemStack main = player.getMainHandStack();
+        VesselBlockEntity be = world.getBlockEntity(pos) instanceof VesselBlockEntity vessel ? vessel : null;
+
+        // Click filled wine glass with empty wine bottle to pour it back.
+        if (fill >= 3 && WineContents.isEmptyWineBottle(main) && be != null && !be.wine().isEmpty()) {
+            if (!world.isClient) {
+                ItemStack wine = be.wine();
+                WineContents.restore(player, Hand.MAIN_HAND, main, wine);
+                be.setWine(ItemStack.EMPTY);
+                world.setBlockState(pos, state.with(FILL, 0), Block.NOTIFY_ALL);
+            }
+            return ActionResult.success(world.isClient);
+        }
+
         if (fill == 0) {
-            int sourceFill = VesselItem.getSourceFill(mainHand);
-            if (sourceFill == 0) sourceFill = VesselItem.getSourceFill(player.getOffHandStack());
-            if (sourceFill != 0) {
+            ItemStack source = VesselItem.getSourceFill(main) != 0 ? main : player.getOffHandStack();
+            int liquid = VesselItem.getSourceFill(source);
+            if (liquid != 0) {
                 if (!world.isClient) {
-                    ItemStack source = VesselItem.getSourceFill(mainHand) != 0 ? mainHand : player.getOffHandStack();
-                    VesselItem.consumeSource(player, source, sourceFill);
-                    world.setBlockState(pos, state.with(FILL, sourceFill), Block.NOTIFY_ALL);
+                    ItemStack originalWine = liquid >= 3 ? source.copyWithCount(1) : ItemStack.EMPTY;
+                    VesselItem.consumeSource(player, source, liquid);
+                    world.setBlockState(pos, state.with(FILL, liquid), Block.NOTIFY_ALL);
+                    if (liquid >= 3 && world.getBlockEntity(pos) instanceof VesselBlockEntity placed)
+                        placed.setWine(originalWine);
                 }
                 return ActionResult.success(world.isClient);
             }
         }
-        if (mainHand.isEmpty() && player.isSneaking()) {
+
+        if (main.isEmpty() && player.isSneaking()) {
             if (!world.isClient) {
-                ItemStack stack = getPickStack(world, pos, state);
-                if (!player.getInventory().insertStack(stack)) player.dropItem(stack, false);
+                ItemStack picked = makeFilledItem(state, be);
+                if (!player.getInventory().insertStack(picked)) player.dropItem(picked, false);
                 world.setBlockState(pos, Blocks.AIR.getDefaultState(), Block.NOTIFY_ALL);
             }
             return ActionResult.success(world.isClient);
         }
-        if (fill != 0 && mainHand.isEmpty()) {
+
+        if (fill != 0 && main.isEmpty()) {
             if (!world.isClient) {
                 if (fill == 2) player.clearStatusEffects();
-                // An audible sip for all nearby players on the authoritative server.
+                if (fill >= 3 && be != null) {
+                    WineContents.drink(be.wine(), world, player);
+                    be.setWine(ItemStack.EMPTY);
+                }
                 world.playSound(null, pos, SoundEvents.ENTITY_GENERIC_DRINK,
                     SoundCategory.PLAYERS, 0.7f, 1.0f);
                 world.setBlockState(pos, state.with(FILL, 0), Block.NOTIFY_ALL);
@@ -91,14 +138,9 @@ public class VesselBlock extends Block {
     }
 
     @Override
-    public ItemStack getPickStack(BlockView world, BlockPos pos, BlockState state) {
-        return new ItemStack(PourAndSeap.vesselItem(this, state.get(FILL)));
-    }
-
-    @Override
     public void afterBreak(World world, PlayerEntity player, BlockPos pos, BlockState state,
-                           @Nullable net.minecraft.block.entity.BlockEntity blockEntity, ItemStack tool) {
+                           @Nullable BlockEntity blockEntity, ItemStack tool) {
         super.afterBreak(world, player, pos, state, blockEntity, tool);
-        if (!world.isClient) Block.dropStack(world, pos, getPickStack(world, pos, state));
+        if (!world.isClient) Block.dropStack(world, pos, makeFilledItem(state, blockEntity));
     }
 }

@@ -1,0 +1,38 @@
+{
+  "display": {
+    "icon": {
+      "item": "pour_and_seap:drinking_glass"
+    },
+    "title": {
+      "translate": "advancement.pour_and_seap.toast_first"
+    },
+    "description": {
+      "translate": "advancement.pour_and_seap.toast_first_desc"
+    },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "parent": "minecraft:story/root",
+  "criteria": {
+    "has_items": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "pour_and_seap:drinking_glass",
+              "pour_and_seap:wine_glass"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "requirements": [
+    [
+      "has_items"
+    ]
+  ]
+}

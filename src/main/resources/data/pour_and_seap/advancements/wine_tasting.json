@@ -1,0 +1,40 @@
+{
+  "display": {
+    "icon": {
+      "item": "pour_and_seap:wine_glass_red_wine"
+    },
+    "title": {
+      "translate": "advancement.pour_and_seap.sommelier"
+    },
+    "description": {
+      "translate": "advancement.pour_and_seap.sommelier_desc"
+    },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "parent": "pour_and_seap:first_sip",
+  "criteria": {
+    "has_items": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "pour_and_seap:drinking_glass_red_wine",
+              "pour_and_seap:drinking_glass_white_wine",
+              "pour_and_seap:wine_glass_red_wine",
+              "pour_and_seap:wine_glass_white_wine"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "requirements": [
+    [
+      "has_items"
+    ]
+  ]
+}

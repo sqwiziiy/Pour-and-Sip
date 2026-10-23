@@ -10,5 +10,16 @@
   "item.pour_and_seap.drinking_glass_water": "Стакан",
   "item.pour_and_seap.drinking_glass_milk": "Стакан",
   "item.pour_and_seap.wine_glass_water": "Винный бокал",
-  "item.pour_and_seap.wine_glass_milk": "Винный бокал"
+  "item.pour_and_seap.wine_glass_milk": "Винный бокал",
+  "drink.pour_and_seap.wine": "Вино",
+  "item.pour_and_seap.drinking_glass_red_wine": "Стакан",
+  "item.pour_and_seap.drinking_glass_white_wine": "Стакан",
+  "item.pour_and_seap.wine_glass_red_wine": "Винный бокал",
+  "item.pour_and_seap.wine_glass_white_wine": "Винный бокал",
+  "advancement.pour_and_seap.toast_first": "Первый глоток",
+  "advancement.pour_and_seap.toast_first_desc": "Создай стакан или винный бокал",
+  "advancement.pour_and_seap.both": "Для любого напитка",
+  "advancement.pour_and_seap.both_desc": "Собери и стакан, и бокал",
+  "advancement.pour_and_seap.sommelier": "Дегустация",
+  "advancement.pour_and_seap.sommelier_desc": "Налей вино из Vinery или NetherVinery"
 }

@@ -20,7 +20,6 @@ import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.UseAction;
 import net.minecraft.world.World;
 import org.jetbrains.annotations.Nullable;
-
 import java.util.List;
 import java.util.Map;
 
@@ -37,15 +36,12 @@ public class VesselItem extends BlockItem {
 
     @Override
     public void appendBlocks(Map<Block, Item> map, Item item) {
-        // Register only the EMPTY variant as the canonical item for the block.
         if (intrinsicFill == 0) super.appendBlocks(map, item);
     }
 
     public static int getFill(ItemStack stack) {
-        if (stack.getItem() instanceof VesselItem vessel) {
-            if (vessel.intrinsicFill != 0) return vessel.intrinsicFill;
-        }
-        // Read 0.2.2 NBT-filled items so existing saves are not silently emptied.
+        if (stack.getItem() instanceof VesselItem vessel && vessel.intrinsicFill != 0)
+            return vessel.intrinsicFill;
         NbtCompound tag = stack.getNbt();
         if (tag == null || !tag.contains(OLD_DRINK_KEY)) return 0;
         return switch (tag.getString(OLD_DRINK_KEY)) {
@@ -58,13 +54,14 @@ public class VesselItem extends BlockItem {
     public static int getSourceFill(ItemStack source) {
         if (source.isOf(Items.POTION) && PotionUtil.getPotion(source) == Potions.WATER) return 1;
         if (source.isOf(Items.MILK_BUCKET)) return 2;
-        return 0;
+        return WineContents.getWineFill(source);
     }
 
     public static void consumeSource(PlayerEntity player, ItemStack source, int fill) {
         if (player.getAbilities().creativeMode) return;
         source.decrement(1);
-        ItemStack remainder = new ItemStack(fill == 1 ? Items.GLASS_BOTTLE : Items.BUCKET);
+        ItemStack remainder = fill == 1 ? new ItemStack(Items.GLASS_BOTTLE)
+            : fill == 2 ? new ItemStack(Items.BUCKET) : WineContents.bottle();
         if (source.isEmpty() && source == player.getStackInHand(Hand.OFF_HAND)) {
             player.setStackInHand(Hand.OFF_HAND, remainder);
         } else if (source.isEmpty() && source == player.getStackInHand(Hand.MAIN_HAND)) {
@@ -78,17 +75,26 @@ public class VesselItem extends BlockItem {
     public TypedActionResult<ItemStack> use(World world, PlayerEntity player, Hand hand) {
         ItemStack stack = player.getStackInHand(hand);
         int fill = getFill(stack);
-
+        if (fill >= 3 && hand == Hand.MAIN_HAND && WineContents.isEmptyWineBottle(player.getOffHandStack())) {
+            ItemStack stored = WineContents.read(stack);
+            if (!stored.isEmpty()) {
+                if (!world.isClient) {
+                    WineContents.restore(player, Hand.OFF_HAND, player.getOffHandStack(), stored);
+                    player.setStackInHand(hand, new ItemStack(PourAndSeap.vesselItem(vesselBlock, 0)));
+                }
+                return TypedActionResult.success(stack, world.isClient);
+            }
+        }
         if (fill == 0 && hand == Hand.MAIN_HAND) {
             ItemStack source = player.getOffHandStack();
             int liquid = getSourceFill(source);
             if (liquid != 0) {
                 if (!world.isClient) {
+                    ItemStack originalWine = liquid >= 3 ? source.copyWithCount(1) : ItemStack.EMPTY;
                     consumeSource(player, source, liquid);
                     ItemStack filled = new ItemStack(PourAndSeap.vesselItem(vesselBlock, liquid));
+                    if (liquid >= 3) WineContents.write(filled, originalWine);
                     if (stack.getCount() > 1) {
-                        // Split exactly ONE vessel from a stack without creating
-                        // an illegal stack of >1 filled cups or losing empty cups.
                         ItemStack emptyRemainder = stack.copy();
                         emptyRemainder.decrement(1);
                         player.setStackInHand(hand, filled);
@@ -102,7 +108,6 @@ public class VesselItem extends BlockItem {
                 return TypedActionResult.success(stack, world.isClient);
             }
         }
-
         if (fill != 0) {
             player.setCurrentHand(hand);
             return TypedActionResult.consume(stack);
@@ -112,9 +117,10 @@ public class VesselItem extends BlockItem {
 
     @Override
     public ItemStack finishUsing(ItemStack stack, World world, LivingEntity user) {
-        if (getFill(stack) == 0) return stack;
-        if (!world.isClient && getFill(stack) == 2) user.clearStatusEffects();
-        // Return the canonical EMPTY stackable item after drinking.
+        int fill = getFill(stack);
+        if (fill == 0) return stack;
+        if (!world.isClient && fill == 2) user.clearStatusEffects();
+        if (fill >= 3) WineContents.drink(WineContents.read(stack), world, user);
         return new ItemStack(PourAndSeap.vesselItem(vesselBlock, 0));
     }
 
@@ -127,8 +133,15 @@ public class VesselItem extends BlockItem {
                               List<Text> tooltip, TooltipContext context) {
         int fill = getFill(stack);
         if (fill != 0) {
-            Text contents = Text.translatable(
-                fill == 1 ? "drink.pour_and_seap.water" : "drink.pour_and_seap.milk");
+            Text contents;
+            if (fill == 1) contents = Text.translatable("drink.pour_and_seap.water");
+            else if (fill == 2) contents = Text.translatable("drink.pour_and_seap.milk");
+            else {
+                ItemStack original = WineContents.read(stack);
+                contents = original.isEmpty()
+                    ? Text.translatable("drink.pour_and_seap.wine")
+                    : original.getName();
+            }
             tooltip.add(Text.translatable("tooltip.pour_and_seap.contents", contents)
                 .formatted(Formatting.GRAY));
         }
