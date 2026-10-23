@@ -5,7 +5,7 @@ Experimental Fabric 1.20.1 mod.
 - **Mod ID:** `pour_and_seap`
 - **Java package:** `com.mentality.pour_and_seap`
 - **License:** All Rights Reserved (not MIT)
-- **Version:** 0.2.1 development prototype
+- **Version:** 0.2.2 development prototype
 
 ## Features for testing
 - Drinking Glass / Wine Glass: placeable 3D blocks with narrow hitboxes.
@@ -24,7 +24,7 @@ cd Pour-and-Sip
 ls build/libs/
 ```
 Java 17 or higher is required for the Gradle build. The wrapper downloads Gradle 8.8.
-Use `build/libs/pour_and_seap-0.2.1.jar` in the Fabric 1.20.1 `mods` folder.
+Use `build/libs/pour_and_seap-0.2.2.jar` in the Fabric 1.20.1 `mods` folder.
 
 ## Test
 ```mcfunction
@@ -38,7 +38,7 @@ Remove old `poursip-0.1.0.jar`, and use a backed-up test world.
 **Not yet implemented:** Vinery wines/effects, Homeostatic thirst, partial
 liquid levels, full multiplayer gameplay testing, drop handling for explosions.
 
-## 0.2.1 model and quality fixes
+## 0.2.2 model and quality fixes
 - Survival collision now matches the glass/goblet selection outline instead of being empty.
 - Held glasses use the **same 3D mesh** as placed glassware (with separate first-person and third-person transforms).
 - Water and milk use higher-contrast, original colors with a taller filled volume, to be visible through the walls.
@@ -46,3 +46,14 @@ liquid levels, full multiplayer gameplay testing, drop handling for explosions.
 - In-hand drinking uses the vanilla `UseAction.DRINK` animation and the generic drink sound. Placed vessels play a short drink sound.
 - A custom player-body animation is deliberately deferred until we can test the particular 3D player-body mod.
 - Full in-game visual/collision tests are still required; a successful CI build only proves compilability.
+
+
+## 0.2.2: simpler solid-liquid glass models
+
+- No custom animation was added: vanilla `UseAction.DRINK` and its sound are preserved.
+- Item `display` positions have been corrected separately for tumbler/wine glass and both hands; the wine glass sits higher to make the avatar grip its stem, rather than its bowl. The cup is shifted toward the center during the vanilla drink animation.
+- Block/item meshes share only **2 (empty) / 3 (filled) visible cuboid groups for the goblet's stem + bowl**, or **1 / 2 for the tumbler**.
+- The side of the glass is an opaque frame with cut-out windows (binary-alpha pixels), not overlapping translucent panes. It uses the client cutout rendering layer to avoid several transparent surfaces masking the liquid, even when shaders are installed.
+- Water and milk have new opaque side surfaces, distinctly tinted top surfaces, and a larger volume inside the cup, so the contents are visible from the side.
+- The frame and liquid textures are original pixel-art made for Pour & Seap.
+- Look-and-feel and hand grip must still be verified in Minecraft with your specific body animation mod and shader pack; Gradle cannot visually validate them.
