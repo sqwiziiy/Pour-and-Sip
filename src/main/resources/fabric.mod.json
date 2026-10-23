@@ -3,11 +3,11 @@
   "id": "pour_and_seap",
   "version": "${version}",
   "name": "Pour & Seap",
-  "description": "Placeable glassware with water, milk and optional Vinery / NetherVinery wine integration.",
+  "description": "Placeable 3D glassware for water, milk and optional Vinery/NetherVinery wines.",
   "authors": [
     "Mentality"
   ],
-  "license": "All Rights Reserved",
+  "license": "GPL-3.0-only",
   "environment": "*",
   "entrypoints": {
     "main": [

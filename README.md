@@ -1,44 +1,98 @@
-# Pour & Seap
+# 🍷 Pour & Seap
 
-A Minecraft **1.20.1 Fabric** mod that adds placeable drinking glasses and wine goblets. Glassware holds water, milk and (optionally) wines from **[Let's Do] Vinery** and **NetherVinery**.
+[🇷🇺 Читать на русском](README_RU.md)
 
-- Mod ID: `pour_and_seap`
-- Java package: `com.mentality.pour_and_seap`
-- License: **All Rights Reserved** (Gradle and other third-party tools retain their own licenses)
-- Fabric API is **required**; Vinery and NetherVinery are **optional**.
+[![Build](https://github.com/sqwiziiy/Pour-and-Sip/actions/workflows/build.yml/badge.svg)](https://github.com/sqwiziiy/Pour-and-Sip/actions/workflows/build.yml)
+![Minecraft 1.20.1](https://img.shields.io/badge/Minecraft-1.20.1-3C8527)
+![Fabric](https://img.shields.io/badge/Loader-Fabric-DBD0B4)
+![Java 17](https://img.shields.io/badge/Java-17-E76F00)
+![GPL-3.0-only](https://img.shields.io/badge/License-GPL--3.0--only-3B57A6)
+
+**Pour & Seap** adds placeable drinking glasses and wine goblets to **Minecraft Java 1.20.1 (Fabric)**. Fill them with water, milk, or wines from **[Let's Do] Vinery** and **NetherVinery**, then drink, carry, or put them on a table.
+
+[Releases](https://github.com/sqwiziiy/Pour-and-Sip/releases) · [Installation](#installation) · [How to use](#how-to-use) · [Changelog](CHANGELOG.md) · [Report a bug](https://github.com/sqwiziiy/Pour-and-Sip/issues)
 
 ## Features
 
-- Two types of placeable, 3D glassware; empty vessels stack to 16, filled to 1.
-- Fill water from a *water potion bottle*, milk from a milk bucket.
-- Fill wine from Vinery or NetherVinery into a glass held in your main hand (bottle in offhand), or into an already placed glass.
-- Wine is displayed as red or pale gold. The original wine ItemStack is preserved, including NBT, and drinking delegates to its original mod effect logic.
-- Pour wine back into its original bottle using a **Vinery empty wine bottle**. This works from held and placed glassware.
-- Drinking sound and vanilla held-drink animation; a pouring sound for wine.
-- Own **Pour & Seap** advancement tab. Pouring wine into a placed glass counts toward Wine Tasting.
-- Russian and English localization.
+- **Two 3D vessels:** a drinking glass and a wine goblet, both placeable.
+- Empty glasses stack up to **16**; filled glasses do not stack.
+- Support for **water**, **milk**, and optional **Vinery / NetherVinery wines**.
+- Separate red and light-golden wine appearances.
+- Preserves the wine's original item data, including its **age**, when pouring, placing, breaking, and retrieving a glass.
+- Wine effects are delegated to the originating mod's drinking behavior.
+- Wine can be poured back into an empty `vinery:wine_bottle` without losing the original wine stack.
+- Native Minecraft drinking animation and sounds, plus a bottle-pouring sound.
+- Dedicated **Pour & Seap** advancements, with English and Russian translations.
 
-## Development
+## Using the glassware
 
-Use Java 17, Fabric Loader, and Fabric API for Minecraft 1.20.1.
+### Obtain or craft
 
-```bash
+Find both glassware items in the **Pour & Seap** Creative tab, or use:
+
+```mcfunction
+/give @s pour_and_seap:drinking_glass
+/give @s pour_and_seap:wine_glass
+```
+
+Crafting recipes are available in your recipe viewer (if installed) and from the vanilla crafting table.
+
+### Filling a glass in your hand
+
+Hold the **empty glass in your main hand** and the source in your **offhand**. Right-click the air:
+
+| Source | Contents | Returned container |
+| --- | --- | --- |
+| Vanilla water potion bottle | Water | Glass bottle |
+| Milk bucket | Milk | Empty bucket |
+| Vinery / NetherVinery wine | Corresponding wine | Empty Vinery wine bottle |
+
+Hold right-click on a filled glass to drink. After drinking, the empty glass is kept.
+
+### Filling a placed glass
+
+Place a glass on a surface, then **right-click it with the liquid source**. You can also retrieve a placed glass with its contents by **sneaking and right-clicking with an empty main hand**.
+
+Right-click a **filled** placed glass with an empty hand to drink from it directly. Breaking a glass in Survival drops it with its contents.
+
+### Returning wine to its original bottle
+
+Hold an **empty Vinery wine bottle** and right-click a placed glass containing wine. For a held glass, keep the glass in your main hand and the empty Vinery wine bottle in your offhand, then right-click the air.
+
+The original wine item, including its data, is restored.
+
+## Installation
+
+1. Install **Fabric Loader for Minecraft 1.20.1**, **Fabric API**, and Java 17 or newer.
+2. Put the Pour & Seap release `.jar` in the `mods/` directory **on both the server and each connecting client**.
+3. Install compatible **[Let's Do] Vinery** and/or **NetherVinery** to enable their wine compatibility. **Neither wine mod is mandatory** if you only want water and milk.
+4. Remove older Pour & Seap JAR versions. Back up your world before updating.
+
+## Compatibility
+
+| Integration | Status |
+| --- | --- |
+| Minecraft 1.20.1 / Fabric API | Required |
+| Water bottles and milk buckets | Built-in |
+| [Let's Do] Vinery | Optional |
+| NetherVinery | Optional |
+| Shader packs and 3D player-body mods | May vary by setup |
+
+The optional wine mods retain control of their own age-dependent effects. The empty bottle for returning wine must currently be **Vinery's empty wine bottle**, not a generic Minecraft glass bottle.
+
+## Building from source
+
+Use JDK 17 and the included Gradle Wrapper:
+
+```sh
 ./gradlew clean build
 ```
 
-The built mod is `build/libs/pour_and_seap-0.3.1.jar`.
-The source repository's main branch runs a CI build; download the build artifact from GitHub Actions for tests.
+Compiled mod: `build/libs/pour_and_seap-0.3.1.jar`. Automated builds validate model resources and produce a downloadable CI artifact.
 
-## Compatibility and limitations
+- **Mod ID:** `pour_and_seap`
+- **Java package:** `com.mentality.pour_and_seap`
+- **License:** [GNU GPL-3.0-only](LICENSE), covering this project's source code and original assets.
+- Gradle Wrapper is a separate third-party build tool distributed under the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0); it is not relicensed by this project.
 
-Vinery and NetherVinery are supported via optional item tags and item inspection. Wine bottle contents and their age data are persisted when the glass is placed and picked back up. The age-dependent effect is calculated by the originating wine mod when consumed.
-
-The compatibility of every wine variant, shader pack and third-person body mod has **not** been automatically verified. Do a world-backup test before updating an existing save. The empty bottle accepted for undo is currently `vinery:wine_bottle`.
-
-Bakery sink ↔ Kaleidoscope kettle is a separate planned compatibility task in [Storm Survival Culinary Compat](https://github.com/sqwiziiy/Storm-Survival-Culinary-Compat/issues/18), not a feature of Pour & Seap.
-
-## Publishing
-
-`.github/workflows/release.yml` is prepared for a verified release tag `v0.3.1` (or a later matching Gradle version).
-
-A Modrinth project must exist, and the repository must have `MODRINTH_TOKEN` as an Actions secret plus `MODRINTH_PROJECT` as an Actions variable (project slug or ID). On release tags, the workflow checks the version, creates a GitHub Release and then publishes to Modrinth **only when both settings are available and the version does not already exist**. No development push to main is published to Modrinth.
+© 2026 Mentality. Not affiliated with Mojang Studios, Fabric, or the Let's Do team.
