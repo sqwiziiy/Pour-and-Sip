@@ -14,9 +14,10 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.shape.VoxelShape;
-import net.minecraft.util.shape.VoxelShapes;
 import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
+import net.minecraft.sound.SoundCategory;
+import net.minecraft.sound.SoundEvents;
 import org.jetbrains.annotations.Nullable;
 
 public class VesselBlock extends Block {
@@ -48,7 +49,7 @@ public class VesselBlock extends Block {
 
     @Override
     public VoxelShape getCollisionShape(BlockState state, BlockView world, BlockPos pos, ShapeContext context) {
-        return VoxelShapes.empty();
+        return getOutlineShape(state, world, pos, context);
     }
 
     @Override
@@ -79,6 +80,9 @@ public class VesselBlock extends Block {
         if (fill != 0 && mainHand.isEmpty()) {
             if (!world.isClient) {
                 if (fill == 2) player.clearStatusEffects();
+                // An audible sip for all nearby players on the authoritative server.
+                world.playSound(null, pos, SoundEvents.ENTITY_GENERIC_DRINK,
+                    SoundCategory.PLAYERS, 0.7f, 1.0f);
                 world.setBlockState(pos, state.with(FILL, 0), Block.NOTIFY_ALL);
             }
             return ActionResult.success(world.isClient);

@@ -8,6 +8,8 @@ import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.sound.SoundEvent;
+import net.minecraft.sound.SoundEvents;
 import net.minecraft.potion.PotionUtil;
 import net.minecraft.potion.Potions;
 import net.minecraft.text.Text;
@@ -87,6 +89,12 @@ public class VesselItem extends BlockItem {
     @Override public int getMaxUseTime(ItemStack stack) { return 32; }
     @Override public UseAction getUseAction(ItemStack stack) { return UseAction.DRINK; }
 
+    // The vanilla drinking animation and intermittent sip sound are played
+    // by the game while this item is being used (no datapack is required).
+    @Override public SoundEvent getDrinkSound() {
+        return SoundEvents.ENTITY_GENERIC_DRINK;
+    }
+
     @Override
     public void appendTooltip(ItemStack stack, @Nullable World world, List<Text> tooltip, TooltipContext context) {
         String key = switch (getFill(stack)) {
@@ -94,7 +102,10 @@ public class VesselItem extends BlockItem {
             case 2 -> "milk";
             default -> "empty";
         };
-        tooltip.add(Text.translatable("tooltip.pour_and_seap." + key).formatted(Formatting.GRAY));
+        // Empty glassware has no instructional clutter; show only the contents.
+        if (getFill(stack) != 0) {
+            tooltip.add(Text.translatable("tooltip.pour_and_seap." + key).formatted(Formatting.GRAY));
+        }
         super.appendTooltip(stack, world, tooltip, context);
     }
 }

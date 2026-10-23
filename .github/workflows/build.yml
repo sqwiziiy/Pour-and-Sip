@@ -20,5 +20,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: pour_and_seap-Fabric-1.20.1-JAR
-          path: build/libs/pour_and_seap-0.2.0.jar
+          path: build/libs/pour_and_seap-0.2.1.jar
           if-no-files-found: error

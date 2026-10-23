@@ -4,7 +4,6 @@
   "item.pour_and_seap.drinking_glass": "Стакан",
   "item.pour_and_seap.wine_glass": "Винный бокал",
   "itemGroup.pour_and_seap.main": "Pour & Seap",
-  "tooltip.pour_and_seap.empty": "Пустой • вода/молоко в левой руке",
-  "tooltip.pour_and_seap.water": "Вода • поставить или выпить",
-  "tooltip.pour_and_seap.milk": "Молоко • поставить или выпить"
+  "tooltip.pour_and_seap.water": "Вода",
+  "tooltip.pour_and_seap.milk": "Молоко"
 }
