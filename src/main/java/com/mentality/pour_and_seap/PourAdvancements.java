@@ -19,3 +19,4 @@ public final class PourAdvancements {
             serverPlayer.getAdvancementTracker().grantCriterion(advancement, "poured_wine");
         }
     }
+}
