@@ -2,111 +2,134 @@ name: Release to GitHub and Modrinth
 
 on:
   push:
-    tags:
-      - 'v*'
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: "Existing release tag (optional, for retrying Modrinth)"
+        required: false
+        type: string
 
 permissions:
   contents: write
 
 concurrency:
-  group: pour-and-seap-release-${{ github.ref }}
+  group: pour-and-seap-release
   cancel-in-progress: false
 
 jobs:
   release:
+    if: github.event_name == 'workflow_dispatch' || startsWith(github.event.head_commit.message, 'release: v')
     runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      MODRINTH_TOKEN: ${{ secrets.MODRINTH_TOKEN }}
+      MODRINTH_PROJECT_ID: ${{ vars.MODRINTH_PROJECT_ID }}
     steps:
       - uses: actions/checkout@v4
-
+        with:
+          ref: ${{ inputs.release_tag || github.ref }}
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: '17'
-
       - uses: gradle/actions/setup-gradle@v4
-
       - name: Validate assets
         run: python3 scripts/validate_assets.py
-
       - name: Build JAR
         run: ./gradlew --no-daemon clean build
-
-      - name: Verify release tag and JAR
+      - name: Validate release metadata
         id: meta
         shell: bash
         run: |
           set -euo pipefail
           VERSION="$(sed -n 's/^mod_version=//p' gradle.properties)"
+          TAG="v$VERSION"
           test -n "$VERSION"
-          test "${GITHUB_REF_NAME}" = "v${VERSION}"
-          JAR="build/libs/pour_and_seap-${VERSION}.jar"
-          test -f "$JAR"
+          test -s "build/libs/pour_and_seap-$VERSION.jar"
+          if [[ -n "${{ inputs.release_tag }}" && "${{ inputs.release_tag }}" != "$TAG" ]]; then
+            echo "::error::Tag does not match version $TAG"
+            exit 1
+          fi
+          if [[ "${{ github.event_name }}" == "push" && "${{ github.event.head_commit.message }}" != "release: $TAG" ]]; then
+            echo "::error::Expected release: $TAG"
+            exit 1
+          fi
+          awk -v h="## $VERSION" '
+            index($0, h) == 1 {p=1; next}
+            p && /^## / {exit}
+            p {print}
+          ' CHANGELOG.md > release-notes.md
+          test -s release-notes.md
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
-          echo "jar=$JAR" >> "$GITHUB_OUTPUT"
-
-      - name: Create GitHub Release if absent
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          echo "jar=build/libs/pour_and_seap-$VERSION.jar" >> "$GITHUB_OUTPUT"
+      - name: Create GitHub Release
         env:
           GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.meta.outputs.tag }}
           VERSION: ${{ steps.meta.outputs.version }}
           JAR: ${{ steps.meta.outputs.jar }}
         shell: bash
         run: |
           set -euo pipefail
-          if ! gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1; then
-            gh release create "$GITHUB_REF_NAME" "$JAR" \
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            echo "GitHub Release $TAG already exists."
+          else
+            gh release create "$TAG" "$JAR" \
               --target "$GITHUB_SHA" \
               --title "Pour & Seap $VERSION — Fabric 1.20.1" \
-              --notes-file CHANGELOG.md
+              --notes-file release-notes.md
           fi
-
-      - name: Check Modrinth setup and versions
+      - name: Check Modrinth publishing setup
         id: modrinth
         env:
-          MODRINTH_TOKEN: ${{ secrets.MODRINTH_TOKEN }}
-          MODRINTH_PROJECT: ${{ vars.MODRINTH_PROJECT }}
+          GH_TOKEN: ${{ github.token }}
           VERSION: ${{ steps.meta.outputs.version }}
         shell: bash
         run: |
           set -euo pipefail
-          if [[ -z "$MODRINTH_TOKEN" || -z "$MODRINTH_PROJECT" ]]; then
-            echo "ready=false" >> "$GITHUB_OUTPUT"
-            echo "Missing MODRINTH_TOKEN secret or MODRINTH_PROJECT variable." >> "$GITHUB_STEP_SUMMARY"
+          echo "ready=false" >> "$GITHUB_OUTPUT"
+          if [[ "$(gh api "repos/$GITHUB_REPOSITORY" --jq '.private')" == "true" ]]; then
+            echo "::notice::Modrinth upload deferred until the source repository is public."
             exit 0
           fi
-          RESPONSE="$(mktemp)"
-          CODE="$(curl -sS -o "$RESPONSE" -w '%{http_code}' \
+          if [[ -z "$MODRINTH_TOKEN" || -z "$MODRINTH_PROJECT_ID" ]]; then
+            echo "::notice::Set MODRINTH_TOKEN secret and MODRINTH_PROJECT_ID repository variable."
+            exit 0
+          fi
+          HTTP="$(curl -sS -o /tmp/modrinth.json -w '%{http_code}' \
             -H "Authorization: $MODRINTH_TOKEN" \
-            "https://api.modrinth.com/v2/project/$MODRINTH_PROJECT")"
-          if [[ "$CODE" != "200" ]]; then
-            echo "ready=false" >> "$GITHUB_OUTPUT"
-            echo "Modrinth project unavailable ($CODE)." >> "$GITHUB_STEP_SUMMARY"
+            "https://api.modrinth.com/v2/project/$MODRINTH_PROJECT_ID")"
+          if [[ "$HTTP" != "200" ]]; then
+            echo "::notice::Modrinth project not accessible ($HTTP)."
             exit 0
           fi
-          ID="$(jq -r '.id' "$RESPONSE")"
+          ID="$(jq -r '.id // empty' /tmp/modrinth.json)"
+          test -n "$ID"
           if curl -fsSL -H "Authorization: $MODRINTH_TOKEN" \
-            "https://api.modrinth.com/v2/project/$ID/version?include_changelog=false" \
-            | jq -e --arg v "$VERSION" '.[] | select(.version_number == $v)' >/dev/null; then
-            echo "ready=false" >> "$GITHUB_OUTPUT"
-            echo "Modrinth version $VERSION already exists; skipped." >> "$GITHUB_STEP_SUMMARY"
+              "https://api.modrinth.com/v2/project/$ID/version?include_changelog=false" \
+              | jq -e --arg version "$VERSION" '.[] | select(.version_number == $version)' >/dev/null; then
+            echo "::notice::Modrinth version already published; skipping."
             exit 0
           fi
           echo "ready=true" >> "$GITHUB_OUTPUT"
-          echo "id=$ID" >> "$GITHUB_OUTPUT"
-
-      - name: Publish on Modrinth
+          echo "project_id=$ID" >> "$GITHUB_OUTPUT"
+      - name: Publish to Modrinth
         if: steps.modrinth.outputs.ready == 'true'
-        uses: Kir-Antipov/mc-publish@v3.3.0
+        uses: Kira-NT/mc-publish@v3.3.1
         with:
-          modrinth-id: ${{ steps.modrinth.outputs.id }}
+          modrinth-id: ${{ steps.modrinth.outputs.project_id }}
           modrinth-token: ${{ secrets.MODRINTH_TOKEN }}
           files: ${{ steps.meta.outputs.jar }}
           name: Pour & Seap ${{ steps.meta.outputs.version }}
           version: ${{ steps.meta.outputs.version }}
           version-type: release
-          changelog-file: CHANGELOG.md
+          changelog-file: release-notes.md
           loaders: fabric
-          game-versions: 1.20.1
-          dependencies: |
-            fabric-api(required){modrinth:P7dR8mSH}
-          java: 17
+          game-versions: '1.20.1'
+          environment: client | server
+          modrinth-dependencies: |
+            P7dR8mSH(required)
+          java: '17'
           fail-mode: fail
