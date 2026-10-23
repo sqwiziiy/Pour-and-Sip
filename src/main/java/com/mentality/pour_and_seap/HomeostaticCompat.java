@@ -1,7 +1,8 @@
 package com.mentality.pour_and_seap;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.MethodType;
 
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.entity.player.PlayerEntity;
@@ -15,54 +16,70 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Optional Homeostatic 1.20.1 compatibility.
+ * Optional server-side integration for Homeostatic 1.20.1.
  *
- * We never define hydration values ourselves. We pass the original consumed
- * item to Homeostatic's public WaterHelper.drink(ServerPlayer, ItemStack, boolean),
- * which reads the server's current datapack definitions, saturation, water
- * quality and effect chances. No runtime dependency when Homeostatic is absent.
+ * Never hardcode hydration: give Homeostatic the exact vanilla source or
+ * preserved wine ItemStack and let its own datapacks determine the effect.
+ *
+ * IMPORTANT: do not use Class.getMethod() on homeostatic.util.WaterHelper.
+ * That common class also has method signatures referencing Minecraft's
+ * client-only Gui and GuiGraphics. Reflection can resolve those signatures
+ * eagerly, causing NoClassDefFoundError on a dedicated server.
+ * MethodHandles.findStatic resolves only the requested hydration method.
  */
 public final class HomeostaticCompat {
     private static final Logger LOGGER = LoggerFactory.getLogger("pour_and_seap/Homeostatic");
     private static boolean resolved;
-    private static Method drinkMethod;
+    private static MethodHandle drinkHandle;
 
     private HomeostaticCompat() {}
 
-    private static synchronized Method method() {
-        if (resolved) return drinkMethod;
+    private static synchronized MethodHandle resolveDrinkHandle() {
+        if (resolved) return drinkHandle;
         resolved = true;
-        if (!FabricLoader.getInstance().isModLoaded("homeostatic")) return null;
+
+        if (!FabricLoader.getInstance().isModLoaded("homeostatic")) {
+            LOGGER.info("Homeostatic is not installed on this server; glassware hydration is disabled.");
+            return null;
+        }
 
         try {
-            Class<?> waterHelper = Class.forName("homeostatic.util.WaterHelper");
-            drinkMethod = waterHelper.getMethod(
-                "drink", ServerPlayerEntity.class, ItemStack.class, boolean.class);
+            Class<?> waterHelper = Class.forName("homeostatic.util.WaterHelper", false,
+                HomeostaticCompat.class.getClassLoader());
+            drinkHandle = MethodHandles.publicLookup().findStatic(
+                waterHelper, "drink",
+                MethodType.methodType(void.class, ServerPlayerEntity.class, ItemStack.class, boolean.class)
+            );
+            LOGGER.info("Homeostatic hydration bridge initialized (server-side WaterHelper).");
         } catch (ReflectiveOperationException | LinkageError ex) {
-            LOGGER.warn("Homeostatic is loaded but the 1.20.1 hydration API is incompatible; " +
-                        "Pour & Seap will not change thirst.", ex);
+            LOGGER.error("Could not connect to Homeostatic 1.20.1 WaterHelper on this server. " +
+                         "Check that the server has the correct Fabric Homeostatic version.", ex);
         }
-        return drinkMethod;
+        return drinkHandle;
     }
 
     public static void onDrink(PlayerEntity player, int liquid, ItemStack originalWine) {
         if (!(player instanceof ServerPlayerEntity serverPlayer)) return;
-        ItemStack source = switch (liquid) {
+
+        ItemStack originalDrink = switch (liquid) {
             case 1 -> PotionUtil.setPotion(new ItemStack(Items.POTION), Potions.WATER);
             case 2 -> new ItemStack(Items.MILK_BUCKET);
             case 3, 4 -> originalWine.isEmpty() ? ItemStack.EMPTY : originalWine.copyWithCount(1);
             default -> ItemStack.EMPTY;
         };
-        if (source.isEmpty()) return;
+        if (originalDrink.isEmpty()) return;
 
-        Method method = method();
-        if (method == null) return;
+        MethodHandle hydration = resolveDrinkHandle();
+        if (hydration == null) return;
 
         try {
-            // Homeostatic defines the actual amount, saturation and thirst effects.
-            method.invoke(null, serverPlayer, source, true);
-        } catch (IllegalAccessException | InvocationTargetException | IllegalArgumentException ex) {
-            LOGGER.warn("Failed to apply Homeostatic hydration for {}.", source.getItem(), ex);
+            // Homeostatic's own datapacks control amount, saturation and effects.
+            hydration.invokeExact(serverPlayer, originalDrink, true);
+        } catch (Throwable ex) {
+            if (ex instanceof VirtualMachineError fatal) throw fatal;
+            if (ex instanceof ThreadDeath fatal) throw fatal;
+            LOGGER.error("Homeostatic refused hydration for {} on dedicated server.",
+                originalDrink.getItem(), ex);
         }
     }
 }

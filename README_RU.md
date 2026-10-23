@@ -90,7 +90,7 @@
 ./gradlew clean build
 ```
 
-Итоговый JAR: `build/libs/pour_and_seap-0.3.2.jar`. GitHub Actions дополнительно проверяет ресурсы и автоматически собирает мод.
+Итоговый JAR: `build/libs/pour_and_seap-0.3.3.jar`. GitHub Actions дополнительно проверяет ресурсы и автоматически собирает мод.
 
 - **Mod ID:** `pour_and_seap`
 - **Пакет Java:** `com.mentality.pour_and_seap`
@@ -98,3 +98,18 @@
 - Gradle Wrapper — отдельный инструмент сборки, распространяемый на условиях [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0); наша GPL не изменяет его лицензию.
 
 © 2026 Mentality. Проект не связан официально с Mojang Studios, Fabric или командой Let's Do.
+
+### Homeostatic на выделенном сервере
+
+На **сервере** должны быть установлены совместимые версии Homeostatic и
+Pour & Seap, даже если оба мода уже есть на клиенте.
+
+В этой версии исправлен потенциальный конфликт Reflection с клиентскими
+классами Homeostatic, которых нет на dedicated server. При первом питье
+в `logs/latest.log` должна появиться строка
+`Homeostatic hydration bridge initialized`. Если интеграция не работает,
+лог сообщит причину. Количество восстанавливаемой жажды берётся исключительно
+из Homeostatic; никаких заданных вручную чисел нет.
+
+Проверь одинаковую воду из обычной бутылки и из стакана на сервере,
+потом установленную посуду и вино.

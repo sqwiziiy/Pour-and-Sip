@@ -90,7 +90,7 @@ Use JDK 17 and the included Gradle Wrapper:
 ./gradlew clean build
 ```
 
-Compiled mod: `build/libs/pour_and_seap-0.3.2.jar`. Automated builds validate model resources and produce a downloadable CI artifact.
+Compiled mod: `build/libs/pour_and_seap-0.3.3.jar`. Automated builds validate model resources and produce a downloadable CI artifact.
 
 - **Mod ID:** `pour_and_seap`
 - **Java package:** `com.mentality.pour_and_seap`
@@ -98,3 +98,19 @@ Compiled mod: `build/libs/pour_and_seap-0.3.2.jar`. Automated builds validate mo
 - Gradle Wrapper is a separate third-party build tool distributed under the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0); it is not relicensed by this project.
 
 © 2026 Mentality. Not affiliated with Mojang Studios, Fabric, or the Let's Do team.
+
+### Homeostatic on dedicated servers
+
+Install compatible Homeostatic and Pour & Seap on the **dedicated server** as
+well as on clients. An installed client mod does not provide server-side
+hydration by itself.
+
+This version addresses a dedicated-server compatibility problem caused by
+reflection over Homeostatic's client-related method signatures. On the first
+drink, check `logs/latest.log` for `Homeostatic hydration bridge initialized`.
+If the bridge fails, the server logs the cause; water and milk effects remain
+unchanged and no invented hydration values are used.
+
+After updating, test the **same** water bottle directly and inside a glass
+on a dedicated server, then test placed glassware and wine. This fix still
+requires an actual multiplayer verification.

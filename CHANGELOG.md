@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.3.3 — Dedicated-server hydration fix
+
+- Replace broad Java reflection with a targeted MethodHandle lookup for Homeostatic's hydration method, avoiding client-only method signatures on dedicated servers.
+- Add explicit server logs for bridge initialization, missing Homeostatic, and compatibility errors.
+- Continue to use Homeostatic's own hydration data for water, milk, and Vinery/NetherVinery wines.
+
 ## 0.3.2 — Homeostatic thirst compatibility
 
 - Drinking from held or placed glasses now delegates thirst and water-saturation changes to Homeostatic when installed.
