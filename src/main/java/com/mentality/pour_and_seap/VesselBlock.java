@@ -128,9 +128,12 @@ public class VesselBlock extends Block implements BlockEntityProvider {
 
         if (fill != 0 && main.isEmpty()) {
             if (!world.isClient) {
+                ItemStack originalWine = fill >= 3 && be != null ? be.wine() : ItemStack.EMPTY;
+                // Drinking from a placed glass never runs vanilla completeUsingItem.
+                HomeostaticCompat.onDrink(player, fill, originalWine);
                 if (fill == 2) player.clearStatusEffects();
                 if (fill >= 3 && be != null) {
-                    WineContents.drink(be.wine(), world, player);
+                    WineContents.drink(originalWine, world, player);
                     be.setWine(ItemStack.EMPTY);
                 }
                 world.playSound(null, pos, SoundEvents.ENTITY_GENERIC_DRINK,

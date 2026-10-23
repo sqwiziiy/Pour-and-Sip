@@ -130,8 +130,14 @@ public class VesselItem extends BlockItem {
     public ItemStack finishUsing(ItemStack stack, World world, LivingEntity user) {
         int fill = getFill(stack);
         if (fill == 0) return stack;
+        ItemStack wine = fill >= 3 ? WineContents.read(stack) : ItemStack.EMPTY;
+        if (!world.isClient && user instanceof PlayerEntity player) {
+            // Reuse the ORIGINAL drink's hydration definition from Homeostatic.
+            // Homeostatic's normal item-use hook only sees our vessel, not its contents.
+            HomeostaticCompat.onDrink(player, fill, wine);
+        }
         if (!world.isClient && fill == 2) user.clearStatusEffects();
-        if (fill >= 3) WineContents.drink(WineContents.read(stack), world, user);
+        if (fill >= 3) WineContents.drink(wine, world, user);
         return new ItemStack(PourAndSeap.vesselItem(vesselBlock, 0));
     }
 

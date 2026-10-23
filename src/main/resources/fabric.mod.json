@@ -25,6 +25,7 @@
   },
   "suggests": {
     "vinery": "*",
-    "nethervinery": "*"
+    "nethervinery": "*",
+    "homeostatic": "*"
   }
 }

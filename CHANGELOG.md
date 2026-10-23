@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.3.2 — Homeostatic thirst compatibility
+
+- Drinking from held or placed glasses now delegates thirst and water-saturation changes to Homeostatic when installed.
+- Hydration is looked up from the original water bottle, milk bucket, or preserved Vinery/NetherVinery wine item.
+- Uses Homeostatic's own datapack-configured hydration and effects; no hardcoded hydration values.
+- Optional integration: existing behavior is unchanged when Homeostatic is not installed.
+
 ## 0.3.1 — First release
 
 - Added Vinery and NetherVinery wine compatibility with original wine item/age preservation.

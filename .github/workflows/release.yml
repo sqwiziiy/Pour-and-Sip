@@ -132,5 +132,6 @@ jobs:
           environment: client | server
           modrinth-dependencies: |
             P7dR8mSH(required)
+            oDobngty(optional)
           java: '17'
           fail-mode: fail

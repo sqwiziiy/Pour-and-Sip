@@ -17,6 +17,7 @@
 - **Two 3D vessels:** a drinking glass and a wine goblet, both placeable.
 - Empty glasses stack up to **16**; filled glasses do not stack.
 - Support for **water**, **milk**, and optional **Vinery / NetherVinery wines**.
+- Optional **Homeostatic** compatibility: drinking restores thirst and saturation using the original drink's own Homeostatic definitions (no hardcoded amounts).
 - Separate red and light-golden wine appearances.
 - Preserves the wine's original item data, including its **age**, when pouring, placing, breaking, and retrieving a glass.
 - Wine effects are delegated to the originating mod's drinking behavior.
@@ -76,6 +77,7 @@ The original wine item, including its data, is restored.
 | Water bottles and milk buckets | Built-in |
 | [Let's Do] Vinery | Optional |
 | NetherVinery | Optional |
+| Homeostatic | Optional; native hydration values when drinking from held or placed glasses |
 | Shader packs and 3D player-body mods | May vary by setup |
 
 The optional wine mods retain control of their own age-dependent effects. The empty bottle for returning wine must currently be **Vinery's empty wine bottle**, not a generic Minecraft glass bottle.
@@ -88,7 +90,7 @@ Use JDK 17 and the included Gradle Wrapper:
 ./gradlew clean build
 ```
 
-Compiled mod: `build/libs/pour_and_seap-0.3.1.jar`. Automated builds validate model resources and produce a downloadable CI artifact.
+Compiled mod: `build/libs/pour_and_seap-0.3.2.jar`. Automated builds validate model resources and produce a downloadable CI artifact.
 
 - **Mod ID:** `pour_and_seap`
 - **Java package:** `com.mentality.pour_and_seap`
