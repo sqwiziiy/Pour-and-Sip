@@ -80,9 +80,11 @@ public class VesselItem extends BlockItem {
             if (!stored.isEmpty()) {
                 if (!world.isClient) {
                     WineContents.restore(player, Hand.OFF_HAND, player.getOffHandStack(), stored);
-                    player.setStackInHand(hand, new ItemStack(PourAndSeap.vesselItem(vesselBlock, 0)));
+                    ItemStack emptied = new ItemStack(PourAndSeap.vesselItem(vesselBlock, 0));
+                    player.setStackInHand(hand, emptied);
+                    return TypedActionResult.success(emptied, false);
                 }
-                return TypedActionResult.success(stack, world.isClient);
+                return TypedActionResult.success(stack, true);
             }
         }
         if (fill == 0 && hand == Hand.MAIN_HAND) {
@@ -104,8 +106,11 @@ public class VesselItem extends BlockItem {
                         player.setStackInHand(hand, filled);
                     }
                     player.getInventory().markDirty();
+                    // Use the SAME new stack as the result. Vanilla may overwrite the
+                    // hand with use().getValue() after our server-side mutation.
+                    return TypedActionResult.success(filled, false);
                 }
-                return TypedActionResult.success(stack, world.isClient);
+                return TypedActionResult.success(stack, true);
             }
         }
         if (fill != 0) {
